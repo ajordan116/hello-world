@@ -1,0 +1,101 @@
+---
+title: "ASSIGNMENT 5"
+author: "Andrew Jordan"
+date: '2022-05-01'
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_knit$set(root.dir = '/Users/Andrew/StatClass/dsc520')
+getwd()
+```
+# Question 1
+
+```{r}
+heights_df <- read.csv("data/r4ds/heights.csv")
+
+cor(heights_df$height,heights_df$earn)
+
+cor(heights_df$age,heights_df$earn)
+
+cor(heights_df$ed,heights_df$earn)
+
+tech_spending <- c(18079, 18594, 19753, 20734, 20831, 23029, 23597, 23584, 25525, 27731, 29449)
+suicides <- c(5427, 5688, 6198, 6462, 6635, 7336, 7248, 7491, 8161, 8578, 9000)
+cor(tech_spending,suicides)
+```
+\newpage
+
+# Question 2
+## As a data science intern with newly learned knowledge in skills in statistical correlation and R programming, you will analyze the results of a survey recently given to college students. You learn that the research question being investigated is: “Is there a significant relationship between the amount of time spent reading and the time spent watching television?” You are also interested if there are other significant relationships that can be discovered?
+
+
+
+1. Use R to calculate the covariance of the Survey variables and provide an explanation of why you would use this calculation and what the results indicate. 
+```{r}
+students_df<-read.csv("data/student-survey.csv")
+cov(students_df[,c("TimeReading","TimeTV","Happiness","Gender")])
+```
+2. Examine the Survey data variables. What measurement is being used for the variables? Explain what effect changing the measurement being used for the variables would have on the covariance calculation. Would this be a problem? Explain and provide a better alternative if needed.
+```{r}
+head(students_df)
+```
+Each variable appears to have its own measurement, though this is based on what I would consider a reasonable assumption for each variables measurement. Time from TimeReading(int) would appear to refer to an hour measurement, whereas TimeTv(int) appears to be in minutes. This is based upon the assumption that reporting one minute of time spent reading and 90 hours of time spent watching TV would be unlikely to occur within the same time frame that the survey is assumed to cover. Happiness(float) appears to be either a point value or percentile, but whether that is a point value determined by survey response of how happy the participant is or how happy a given participant self-reports compared to the other participants, is unclear. Gender(int) appears to be a binary "yes/no" measurement, but has no indication what gender is the baseline "yes". 
+
+At this point, the only measurement I believe could be changed and maintain any sort of data integrity without seeing the original survey would be to change the TimeReading from (the assumed measurement of)hours to minutes to match TimeTv, or vice versa. As seen in the results below, changing this measurement to more accurately reflect the assumed responses shows a much greater relationship between TimeReading and the other variables.
+```{r}
+students_df_altered<-read.csv("data/student-survey.csv")
+students_df_altered$TimeReading<-students_df_altered$TimeReading*60
+cov(students_df_altered)
+```
+
+3. Choose the type of correlation test to perform, explain why you chose this test, and make a prediction if the test yields a positive or negative correlation?
+I have chosen to use Pearson's correlation test as the data appears to be on an interval scale. I would expect the TimeTV and Happiness variables to have a negative correlation, however when examining the actual data the variables appear as if they will have a positive correlation.
+```{r}
+x<-students_df[,"TimeTV"]
+y<-students_df[,"Happiness"]
+cor.test(x,y,method="pearson")
+```
+4. Perform a correlation analysis of:
+
+  All Variables
+```{r}
+cor(students_df,method = "pearson")
+```
+  A single correlation between a pair of the variables
+```{r}
+cor(students_df$TimeReading,students_df$TimeTV,method = "pearson")
+```
+  
+  Repeat your correlation test in step 2 but set the confidence interval at 99%
+```{r}
+cor.test(students_df$TimeReading,students_df$TimeTV,method = "pearson",conf.level = .99)
+```
+  
+  Describe what the calculations in the correlation matrix suggest about the relationship between the variables. Be specific with your explanation.
+  
+   The results show that the relationship between the TimeReading and TimeTV variables have a negative correlation, in that as more time is spent reading, less time is spent watching      TV.
+
+5. Calculate the correlation coefficient and the coefficient of determination, describe what you conclude about the results.
+```{r}
+cor(students_df$TimeReading,students_df$TimeTV)
+```
+```{r}
+cor(students_df$TimeReading,students_df$TimeTV)^2
+```
+Looking at the above results, one can conclude that there appears to be a relatively high correlation between TimeReading and TimeTV, with TimeReading accounting for up to          approximately 78% of variation in TimeTV.
+
+6.Based on your analysis can you say that watching more TV caused students to read less? Explain.
+  Watching more TV does indeed appear to cause students to read less. The negative correlation of .88 shows that as one of these variables rises in value the other decreases, showing that as more time was spent watching TV, less time was spent reading (and vice versa).
+  
+7. Pick three variables and perform a partial correlation, documenting which variable you are “controlling”. Explain how this changes your interpretation and explanation of the results.
+```{r}
+library(ppcor)
+students_df_abridged<-students_df[, c("TimeReading","TimeTV","Happiness")]
+#Partial correlation of TimeReading and TimeTV while controlling Happiness
+pcor(students_df_abridged)
+```
+After wrestling with this concept for a while, I believe I have correctly calculated the partial correlation while controlling Happiness, however I don't fully understand the concept well enough to understand and/or explain how changes my interpretation of the results. 
