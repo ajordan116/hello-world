@@ -1,0 +1,112 @@
+---
+title: "Week 8&9 Assignments"
+author: "Andrew Jordan"
+date: '2022-05-11'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_knit$set(root.dir = '/Users/Andrew/StatClass/dsc520/')
+getwd()
+```
+
+## Question 3.A.i
+```{r}
+library(readxl)
+library(ggplot2)
+housing_df <- read_excel("data/week-7-housing.xlsx")
+
+housing_df <- within(housing_df,bathrooms <- bath_full_count + (bath_half_count*.5) + (bath_3qtr_count*.75))
+
+housing_df <- housing_df[ ,c("Sale Date","Sale Price","addr_full","zip5","square_feet_total_living","bedrooms","bathrooms","year_built","year_renovated","sq_ft_lot","building_grade","present_use")]
+
+housing_df <- housing_df[housing_df$"Sale Price" < 2000000 & housing_df$"Sale Price" > 99999,]
+
+summary(housing_df)
+```
+##Question 3.B.i
+As the focus for this dataset's usage is Sale Price and other variables that are possible predictors there are a few modifications I made to the dataset to exclude irrelevant variables.
+Bathrooms were consolidated from three separate categories of full bath, half bath, and three-quarter bath, into one category of bathrooms. Several redundant variables were excluded,
+including the city name and postal city name as those are covered by the zipcode category, and longitude and latitude as those are more reasonably covered by the full street address.
+The most relevant remaining variables included are the sale price, sale date, number of bedrooms and bathrooms, square footage of the property and the lot, building grade, each property's
+present use, the year the property was built, and-when applicable-the year it was most recently renovated. Outliers in Sale Price were also removed, with properties sold for over 
+two million and under one hundred thousand being excluded. 
+
+##Question 3.B.ii
+```{r}
+priceByLot_lm <- lm(housing_df$"Sale Price"~housing_df$sq_ft_lot,data=housing_df)
+
+priceByVars_lm <- lm(housing_df$"Sale Price"~housing_df$zip5 + housing_df$bedrooms + housing_df$bathrooms + housing_df$year_built + housing_df$square_feet_total_living,data=housing_df)
+```
+As the location, square footage, number of rooms, and age of a house are all considered important factors when buying a home, these are the predictors I have chosen to include. 
+
+##Question 3.B.iii
+```{r}
+summary(priceByLot_lm)
+summary(priceByVars_lm)
+```
+As the R2 of the first model is .03135, this indicates that the square footage of a lot accounts for only 3.14% of variation in the sale price. The second model's R2 value of .4977 shows a 49.77% relation between the predictors and variation in sale price. The inclusion of the additional predictors in the second model provides an explanation for nearly half of the variation found in sale price. The adjusted R2 values for the first and second models have a difference of .0008 and .0002 respectively. This shows that there is an expected .08% and .02% difference for the respective models were the data derived from the entire population, as opposed to a sample.
+
+##Question 3.B.iV
+```{r}
+library(lm.beta)
+lm.beta(priceByVars_lm)
+```
+The standardized beta results indicate a high degree of importance for square_feet_total_living as it shows for every one standard deviation in Sale Price, there should be a .70 rise of square_feet_total_living as well. zip5, bathrooms, and year_built all have lower degrees of importance, with results less than .1 per one standard deviation.
+##Question 3.B.v
+```{r}
+confint(priceByVars_lm)
+```
+
+##Question 3.B.vi
+```{r}
+anova(priceByLot_lm, priceByVars_lm)
+```
+
+##Question 3.B.vii
+```{r}
+housing_df$residuals <- resid(priceByVars_lm)
+housing_df$standardizedResiduals <- rstandard(priceByVars_lm)
+summary(housing_df)
+```
+##Question 3.B.viii
+```{r}
+housing_df$greaterResiduals <- housing_df$standardizedResiduals > 2
+housing_df$lesserResiduals <- housing_df$standardizedResiduals < -2
+summary(housing_df)
+```
+##Question 3.B.ix
+```{r}
+sum(housing_df$greaterResiduals)
+```
+##Question 3.B.x
+```{r}
+housing_df[housing_df$greaterResiduals, c("Sale Price","zip5","square_feet_total_living","bedrooms","bathrooms")]
+```
+##Question 3.B.xi
+```{r}
+housing_df$cooksDistance <- cooks.distance(priceByVars_lm)
+housing_df$leverage <- hatvalues(priceByVars_lm)
+housing_df$covarianceRatios <- covratio(priceByVars_lm)
+
+housing_df[housing_df$greaterResiduals, c("cooksDistance", "leverage", "covarianceRatios")]
+```
+##Question 3.B.xii
+```{r}
+library(car)
+durbinWatsonTest(priceByVars_lm)
+```
+##Question 3.B.xiii
+```{r}
+vif(priceByVars_lm)
+```
+##Question 3.B.xiV
+```{r}
+plot(priceByVars_lm)
+```
+```{r}
+hist(housing_df$standardizedResiduals)
+```
+
+##Question 3.B.xv
