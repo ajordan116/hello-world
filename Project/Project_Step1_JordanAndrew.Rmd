@@ -1,0 +1,45 @@
+---
+title: "Final Project Part 1"
+author: "Andrew Jordan"
+date: '2022-05-14'
+output: pdf_document
+---
+
+##Introduction 
+
+The National Football League (NFL) is a multi-billion dollar industry, with the lowest value of an individual team coming in at $2.27 billion. That kind of value is sustained and improved upon in a myriad of ways, but the best way for a team to increase their value is through winning. To win, one would presumably want the best scorers of points on their team. Well, with the exception of two teams (Dallas and San Francisco) every team's record holder for points scored is a placekicker. This begs the question, how valuable is a kicker to an NFL team? Does it warrant one of only seven draft picks a team gets each year? This is the question I look to answer, and as important as the NFL draft is to the sustained success of NFL teams, this is a question that 32 organizations should be very interested in answering. Data science is the future for sports decisions and answering this question is no exception. Through the use of data from 1977 through 2016 I will examine the success of NFL kickers in relation to their draft pick, to determine if they are worth using a draft pick upon.
+
+##Research Questions 
+
+1. What statistics reflect a kicker's value?
+2. How long is the average kicker's career?
+3. Did the average kicker affect their drafted team's success?
+4. What round of the draft are kickers most selected?
+5. How valuable is each round's draft pick (i.e. round 1 value vs. round 7 value)?
+6. Is the replacement value of a kicker greater than the value of a draft pick?
+
+##Proposed Approach
+
+Addressing the question of whether a kicker is worth a draft pick will be a matter of comparing the value of a draft pick from each round against both the average kicker's success and their impact on a team's success. To determine a kicker's success I will identify the most important statistics for NFL placekickers. Next I will attempt to quantify how valuable a player of an alternate position of need, that was available at the same draft spot as the kicker taken, would have been to a team. Finally, I will examine the value of available replacement kickers with the intent of comparing that against the value of the alternate position of need pick, as well as the impact of kickers on a team's success.
+
+##How My Approach Will Address The Problem
+
+Following my above plan will provide information in the form of a draft pick's value per round, a kicker's impact on team success, a kicker's value per round vs. draft pick value per round, and both kicker and draft pick replacement value. Using this information one will be able to determine in which round of the draft a kicker's value equals or exceeds the value of a draft pick. One will also be able to compare a kicker's draft value against an alternate position of need's draft value. Finally, one can examine the value of a drafted kicker against that of an available replacement kicker. With these three valuations of kickers, a team should be able to partially answer whether a kicker is valuable enough upon which to use a draft pick. 
+
+##Datasets
+
+1. The first dataset I will be using contains NFL draft picks from 1977 through 2016. This dataset was found on kaggle.com and the information was compiled from both the NFL GSIS dataset and publically available draft records. [Draft Dataset](https://www.kaggle.com/datasets/toddsteussie/nfl-play-statistics-dataset-2004-to-present?select=draft.csv)
+2. The next two datasets I will be using track career field goal and kickoff statistics. This data was also found on kaggle.com, and was compiled by scraping the statistics and game logs from the official NFL website. [Field Goal Dataset](https://www.kaggle.com/datasets/kendallgillies/nflstatistics?select=Career_Stats_Field_Goal_Kickers.csv) [Kickoff Dataset](https://www.kaggle.com/datasets/kendallgillies/nflstatistics?select=Career_Stats_Kickoff.csv)
+3. The final datasets I currently plan to use contain team records and statistics, as well as each season's champion. These datasets were compiled from data found on ESPN's "Team Stats" page, and Pro Football Reference's Super Bowl Champion table. [Team Stats](https://www.kaggle.com/datasets/cviaxmiwnptr/nfl-team-stats-20022019-espn) [Yearly Champion](https://www.pro-football-reference.com/years/)
+
+##Packages
+
+To combine these datasets, I will need dplyr, plyr and readr, for the lapply, read.csv and bind.rows functions. I will also need the ggplot2 package for plotting my data, as well as corrr for creating and working with the dataframes to find correlations.
+
+##Plots/Tables
+
+I plan to use a scatter plot to illustrate the average value of an unused draft pick, and plotting how far above or below that average a draft pick used on a kicker is. The same technique can also be used to illustrate the average value of an alternate position of need draft pick.  I also plan to use a column chart to display the difference in value of an unused draft pick, a kicker draft pick, and available replacement kicker value. 
+
+##Future Step Questions
+
+Currently, I believe the greatest challenge I will face is understanding how to properly calculate alternate position of need and replacement kicker values. While there are many datasets available that may provide the necessary information, I do now know how to quantify the minutiae of those decisions' impact without manually researching each team's positions of needs and what replacement kickers were available. While not necessarily something I do not know how to do (just something in which I have little experience), this project also has the potential for an expansion in scope that makes it unrealistic to complete for this course. Managing the scope by using only data that is absolutely necessary to answer the question will be an important step.
