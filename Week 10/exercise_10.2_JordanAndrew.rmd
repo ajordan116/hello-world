@@ -1,0 +1,50 @@
+---
+title: "Exercise 10.2"
+author: "Andrew Jordan"
+date: '2022-05-21'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_knit$set(root.dir = 'C:/Users/Andrew/StatClass/dsc520/')
+getwd()
+```
+# Question 1
+
+```{r}
+library(foreign)
+
+surgery_df <- read.arff("data/ThoraricSurgery.arff")
+
+surgery_glm <- glm(Risk1Yr ~ DGN + PRE4 + PRE5 + PRE6 + PRE7 + PRE8 + PRE9 + PRE10 + PRE11 + PRE14 + PRE17 + PRE19 + PRE25 + PRE30 + PRE32 + AGE, data=surgery_df, family = binomial)
+summary(surgery_glm)
+```
+According to the above summary, it appears that the variables "Pre9",those with Dyspnoea before the surgery, and the "OC14" variant of "Pre14" variable that list the size of the original tumor, have the greatest effect on survival rate. "Pre30" and "Pre17" also having a large impact as well, showing that these variables respectively tracking smoking and type 2 diabetes also have a large impact. The pvalues of "Pre9" at .005 and "Pre14OC14" at .007 indicate a high statistical significance. The pvalues of "Pre30" at .03 and "Pre17" at .04 also indicate statistical significance, but not nearly as much as "Pre9" and "Pre14OC14".
+
+```{r}
+surgery_res <- predict(surgery_glm, type = "response")
+surgeryPrediction <- table(Actual = surgery_df$Risk1Yr, Predicted = surgery_res > .5)
+
+(surgeryPrediction[[1,1]] + surgeryPrediction[[2,2]]) / sum(surgeryPrediction)
+```
+The accuracy of the model is approximately 84%.
+
+
+# Question 2
+
+```{r}
+binary_df <- read.csv("data/binary-classifier-data.csv")
+head(binary_df)
+
+binary_glm <- glm(label ~ x+y, data = binary_df, family = binomial)
+summary(binary_glm)
+```
+```{r}
+binary_res <- predict(binary_glm, type = "response")
+binaryPrediction <- table(Actual = binary_df$label, Predicted = binary_res > .5)
+
+(binaryPrediction[[1,1]] + binaryPrediction[[2,2]]) / sum(binaryPrediction) 
+```
+The accurracy of the logistic regression classifier is approximately 58%. 
+
