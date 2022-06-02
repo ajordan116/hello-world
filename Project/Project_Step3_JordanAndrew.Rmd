@@ -1,0 +1,84 @@
+---
+title: "Final Project Part 3"
+author: "Andrew Jordan"
+date: '2022-06-02'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+knitr::opts_knit$set(root.dir = 'C:/Users/Andrew/StatClass/dsc520/')
+knitr::opts_chunk$set(echo = TRUE, warning= FALSE, message=FALSE)
+getwd()
+```
+
+## Introduction
+The use of data science is ubiquitous across all industries' decision making in one form or another, and nowhere can data driven decision-making be better seen than in professional sports. The National Football League (NFL) is a multi-billion dollar industry in which the lowest individual value of of the thirty-two NFL teams is an incredible $2.27 billion. The best way for a team to garner and sustain value is through winning, and naturally one would assume the greatest avenue to winning is by employing players that are the best at scoring points. With the exception of two teams, every team's individual record holder for career points scored is a placekicker. This begs an important question: is a kicker worth one of only seven precious draft picks a team gets each year? Successfully navigating the annual draft is critical for an NFL team's sustained success, thus the answer to this question is something in which all thirty-two teams should be interested. Using datasets containing draft data from 1977 through 2016 and kickers' career statistical performance, I will attempt to determine if a kicker is worth spending a draft pick upon. 
+
+
+## Problem Statement
+To determine whether a kicker is worth spending a draft pick upon the following factors must be considered:
+1. What statistics reflect a kicker's value?
+2. What number draft pick was used on each kicker?
+3. What correlation is there between a kicker's career statistical performance and their draft pick?
+
+## Addressing the Problem Statement + (Code)
+In the code below I have imported the datasets, removed non-relevant data, merged the data using player names, removed any players that were undrafted, and taken a cursory look into correlation between kicker statistical performance and draft position. 
+
+To examine the data more fully, weighted regression models and correlation tests must be performed, with draft picks being assigned a weighted value relative to their draft year and round.  
+```{r}
+library(tidyverse)
+draft_df <- read.csv("data/draft.csv")
+draft_df <- filter(draft_df, position == "K")
+draft_df <- draft_df[c("draft","round","pick","nameFull")]
+draft_df <- draft_df[order(draft_df$nameFull),]
+head(draft_df)
+```
+
+```{r}
+fieldGoal_df <- read.csv("data/field-goal-stats.csv")
+fieldGoal_df <- filter(fieldGoal_df, Year >= 1977)
+fieldGoal_df <- fieldGoal_df[c("Name","Year","Team","Games.Played","FGs.Made","FGs.Attempted","FG.Percentage")]
+fieldGoal_df <- fieldGoal_df %>% mutate_at(c("FGs.Made","FGs.Attempted","FG.Percentage"),as.integer)
+fieldGoal_df <- aggregate(cbind(Games.Played,FGs.Made,FGs.Attempted) ~ Name, data = fieldGoal_df, sum)
+fieldGoal_df$Career_FG_Percentage <- with(fieldGoal_df, (FGs.Made / FGs.Attempted) * 100)
+colnames(fieldGoal_df)[1] <- "nameFull"
+fieldGoal_df <- fieldGoal_df[order(fieldGoal_df$nameFull),]
+head(fieldGoal_df)
+```
+
+```{r}
+kicker_df <- inner_join(fieldGoal_df, draft_df, by = "nameFull")
+kicker_df
+```
+
+```{r}
+summary(kicker_df)
+```
+
+```{r}
+cor_df <- cor(kicker_df[sapply(kicker_df, is.numeric)])
+cor_df
+```
+
+```{r}
+library(corrplot)
+corrplot(cor_df)
+```
+
+```{r}
+kicker_lm <- lm(pick ~ FGs.Made + Games.Played + FGs.Attempted, data = kicker_df)
+summary(kicker_lm)
+```
+
+## Analysis
+Based solely upon the above results, there appears to be little evidence that a kicker is worth spending a draft pick upon. Neither the number of points scored by a kicker (FGs.Made) nor their career length (Games.Played) show any statistically significant correlation with their draft pick. If using a properly weighted multiple regression model or correlation test the results may differ, however there is such a low correlation shown that even if the results differ, the variables could remain statistically insignificant. 
+
+## Implications
+The lack of statistically significant evidence implies that not only is a kicker not worth using a high value draft pick upon, it is unlikely that a kicker will ever perform well enough to justify using any draft pick on them. Instead, the above results indicate that teams would receive better value by waiting until after the yearly draft to offer employment to kickers that went undrafted. 
+
+## Limitations
+The most impactful limitation on this project is my own lack of knowledge regarding weighted regression models and correlation tests. With that knowledge one could more fully examine the data as the value of draft picks changes both over time and by round. Another limitation is the availability of data on team specific values. Each NFL team applies a different strategy in their pursuit of winning, and as such each team has different valuation for different positions. Without insight into each team's closely guarded valuation of the kicker position, whether or not their valuation is accurate, we are limited to only examining a kickers value against a draft pick on an objective scale, while the true value of each is skewed by teams' subjective valuation. 
+
+## Concluding Remarks
+While the true valuation of a kicker vs draft pick is reliant upon a team's subjective valuation, the results shown above do indicate that the best value at the kicker position can be found in the pool of undrafted players post-draft. As draft pick position shows little implication that a kickers performance or career length can be expected to be any better or worse, one can then conclude (without weighted pick values) that where a kicker is drafted will rarely impact a team's success. 
